@@ -312,6 +312,14 @@ impl LruDiskCache {
             None => Ok(()),
         }
     }
+
+    pub fn clear(&mut self) -> Result<()> {
+      for (file, size) in get_all_files(&self.root) {
+        self.remove(file).expect("Cannot remove files");
+      }
+      self.lru.clear();
+      Ok(())
+    }
 }
 
 #[cfg(test)]
