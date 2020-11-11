@@ -14,6 +14,7 @@ use std::fmt;
 use std::fs::{self, File};
 use std::hash::BuildHasher;
 use std::io;
+use std::io::{BufWriter};
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 
@@ -252,7 +253,7 @@ impl LruDiskCache {
     /// Add a file with `bytes` as its contents to the cache at path `key`.
     pub fn insert_bytes<K: AsRef<OsStr>>(&mut self, key: K, bytes: &[u8]) -> Result<()> {
         self.insert_by(key, Some(bytes.len() as u64), |path| {
-            let mut f = File::create(&path)?;
+            let mut f = BufWriter::new(File::create(&path)?);
             f.write_all(bytes)?;
             Ok(())
         })
@@ -311,14 +312,6 @@ impl LruDiskCache {
             }
             None => Ok(()),
         }
-    }
-
-    pub fn clear(&mut self) -> Result<()> {
-      for (file, size) in get_all_files(&self.root) {
-        self.remove(file).expect("Cannot remove files");
-      }
-      self.lru.clear();
-      Ok(())
     }
 }
 
