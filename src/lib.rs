@@ -300,6 +300,14 @@ impl LruDiskCache {
         self.get_file(key).map(|f| Box::new(f) as Box<dyn ReadSeek>)
     }
 
+    pub fn refresh<K: AsRef<OsStr>>(&mut self, key: K) -> Result<()> {
+      let rel_path = key.as_ref();
+      match self.lru.get(rel_path) {
+        Some(_) => Ok(()),
+        None => Err(Error::FileNotInCache)
+      }
+    }
+
     /// Remove the given key from the cache.
     pub fn remove<K: AsRef<OsStr>>(&mut self, key: K) -> Result<()> {
         match self.lru.remove(key.as_ref()) {
